@@ -1,4 +1,7 @@
 import GerenciadorFilmes from "../filmes/gerenciador-filmes";
+import RepositorioFilmes from "../filmes/repositorio-filmes";
+
+jest.mock("../filmes/repositorio-filmes");
 
 describe("Gerenciador de filmes", () => {
   let gerenciador = null;
@@ -19,6 +22,7 @@ describe("Gerenciador de filmes", () => {
       // Passos
       gerenciador.addFilme(filme);
 
+      gerenciador.repositorio.count.mockReturnValue(1);
       // Pós-condições
       const totalFilmes = gerenciador.getTotal();
       expect(totalFilmes).toBe(1);
@@ -31,8 +35,14 @@ describe("Gerenciador de filmes", () => {
         genero: ["Drama"],
       };
       gerenciador.addFilme(filme);
+
+      gerenciador.repositorio.count.mockReturnValue(1);
       const tamanhoInicial = gerenciador.getTotal();
+
+      gerenciador.repositorio.listar.mockReturnValue([filme]);
       gerenciador.remFilme(filme);
+
+      gerenciador.repositorio.count.mockReturnValue(0);
       const tamanhoFinal = gerenciador.getTotal();
       expect(tamanhoFinal).toBeLessThan(tamanhoInicial);
     });
@@ -59,5 +69,32 @@ describe("Gerenciador de filmes", () => {
         gerenciador.addFilme(filme);
       }).toThrowError();
     });
+
+    test("Não deve ser possível remover um filme inexistente", () => {
+      const filme = {
+        titulo: "Scott Pilgrim contra o Mundo",
+        ano: 2010,
+        genero: ["Aventura", "Romance"],
+      };
+
+      const filmesMock = [
+        {
+          titulo: "Shrek",
+          ano: 2001,
+          genero: ["Comédia"],
+        },
+        {
+          titulo: "Sempre ao seu lado",
+          ano: 2016,
+          genero: ["Drama"],
+        },
+      ];
+
+      gerenciador.repositorio.listar.mockReturnValue(filmesMock);
+
+      expect(() => gerenciador.remFilme(filme)).toThrowError();
+    });
   });
+
+  afterEach(() => jest.clearAllMocks());
 });

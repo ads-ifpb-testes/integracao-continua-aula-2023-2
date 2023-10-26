@@ -1,6 +1,8 @@
+import RepositorioFilmes from "./repositorio-filmes";
+
 export default class GerenciadorFilmes {
   constructor() {
-    this.filmes = [];
+    this.repositorio = new RepositorioFilmes();
   }
 
   addFilme(filme) {
@@ -10,15 +12,19 @@ export default class GerenciadorFilmes {
     if (filme.titulo.trim().length === 0) {
       throw Error("Título do filme não pode ser vazio");
     }
-    this.filmes.push(filme);
+    this.repositorio.inserir(filme);
   }
 
-  remFilme(filmeParaRemocao) {
-    const indice = this.filmes.indexOf(filmeParaRemocao, 0);
-    return this.filmes.splice(indice, 1);
+  remFilme(filme) {
+    const filmesAtuais = this.repositorio.listar();
+    const indexFilme = filmesAtuais.indexOf(filme, 0);
+    if (indexFilme < 0) {
+      throw new Error("O filme informado para remoção não existe");
+    }
+    return this.repositorio.remover(filme);
   }
 
   getTotal() {
-    return this.filmes.length;
+    return this.repositorio.count();
   }
 }
